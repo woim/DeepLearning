@@ -15,7 +15,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
-
+import keras
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation
 
@@ -33,7 +33,7 @@ PATH = "/home/francois/Development/DataSet/dogs-vs-cats/train"
 VALID_SPIT = 0.2
 IMAGE_SIZE = 64
 IMAGE_CHANNELS = 1
-MAX_DATA = len(os.listdir(PATH))
+MAX_DATA = 20000 #len(os.listdir(PATH))
 EPOCHS = 200
 BATCH_SIZE = 32
 LR = 1e-6
