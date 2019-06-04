@@ -40,62 +40,6 @@ LR = 1e-6
 ###############################################################################
 
 
-##############################################################################
-# Processing data
-##############################################################################
-label_cat = []
-label_dog = []
-data_cat  = []
-data_dog  = []
-counter   = 0
-
-for file in os.listdir(PATH):
-    if counter < MAX_DATA:
-        image_data = cv2.imread(os.path.join(PATH,file), cv2.IMREAD_GRAYSCALE)
-        image_data = cv2.resize(image_data,(IMAGE_SIZE,IMAGE_SIZE))
-        if file.startswith("cat"):
-            label_cat.append(1)
-            #data_cat.append(image_data[:,:,::-1]/255) # opencv read BGR plt imshow wxpect RGB we need to reverse the last channel
-            data_cat.append(image_data/255) # opencv read BGR plt imshow wxpect RGB we need to reverse the last channel
-        elif file.startswith("dog"):
-            label_dog.append(0)
-            #data_dog.append(image_data[:,:,::-1]/255) # opencv read BGR plt imshow wxpect RGB we need to reverse the last channel
-            data_dog.append(image_data/255) # opencv read BGR plt imshow wxpect RGB we need to reverse the last channel
-        counter += 1
-        
-        if counter%1000 == 0:
-            print (counter," image data retreived")
-
-data_cat = np.array(data_cat)
-data_dog = np.array(data_dog)
-label_cat = np.array(label_cat)
-label_dog = np.array(label_dog)
-
-print (data_cat.shape)
-print (label_cat.shape)
-print (data_dog.shape)
-print (label_dog.shape)
-
-train_cat_data, valid_cat_data, train_cat_label, valid_cat_label = train_test_split(
-        data_cat, label_cat, test_size = VALID_SPIT, random_state = 42)
-train_dog_data, valid_dog_data, train_dog_label, valid_dog_label = train_test_split(
-        data_dog, label_dog, test_size = VALID_SPIT, random_state = 42)
-
-train_data  = np.concatenate((train_cat_data, train_dog_data), axis = 0) 
-valid_data  = np.concatenate((valid_cat_data, valid_dog_data), axis = 0)
-train_label = np.concatenate((train_cat_label, train_dog_label), axis = 0) 
-valid_label = np.concatenate((valid_cat_label, valid_dog_label), axis = 0)
-
-del data_cat, label_cat
-del data_dog, label_dog
-del train_cat_data, valid_cat_data, train_cat_label, valid_cat_label
-del train_dog_data, valid_dog_data, train_dog_label, valid_dog_label
-
-train_data, train_label = shuffle(train_data, train_label, random_state=0)
-valid_data, valid_label = shuffle(valid_data, valid_label, random_state=0)
-train_data = train_data.reshape(-1, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNELS)
-valid_data = valid_data.reshape(-1, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNELS)
-###############################################################################
 
 
 
