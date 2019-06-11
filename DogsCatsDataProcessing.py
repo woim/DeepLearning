@@ -17,7 +17,7 @@ from sklearn.utils import shuffle
 # Read image
 #------------------------------------------------------------------------------
 def ReadImage(filename, size):
-    image = io.imread(filename, as_grey=True)
+    image = io.imread(filename, as_gray=True)
     data = transform.resize(image, (size,size), anti_aliasing=True)
     data /= 255
     return data
@@ -79,6 +79,8 @@ def LoadData(dataDir, maxData, size, percentageSplit):
     print()
     trainData = trainData.reshape(-1, size, size, 1)
     validationData = validationData.reshape(-1, size, size, 1)
+    
+    return {'data': trainData, 'label':trainLabel}, {'data': validationData, 'label':validationLabel }
 #------------------------------------------------------------------------------
 
 
@@ -92,9 +94,13 @@ def main():
     parser.add_argument('dataDir',
                         type = str,
                         help = 'directory containing data.')
-    parser.add_argument('dataFile',
+    parser.add_argument('trainingDataFile',
                         type = str,
-                        help = 'numpy file containing processed data.')
+                        help = 'numpy file containing training data.')
+    parser.add_argument('-v', '--validationDataFile',
+                        type = str,
+                        nargs = '?',
+                        help = 'numpy file containing validation data.')    
     parser.add_argument('-m', '--maxData',
                         type = int,
                         help = 'Number of run on the data.')
@@ -111,7 +117,12 @@ def main():
     if args.maxData == None:
         args.maxData = len(os.listdir(args.dataDir))
     
-    LoadData(args.dataDir, args.maxData, args.size, args.precentageSplit)
+    training, validation = LoadData(args.dataDir, args.maxData, args.size, args.precentageSplit)
+    np.save(args.trainingDataFile, training)
+    
+    if args.validationDataFile != None:
+        np.save(args.validationDataFile, validation)
+        
 #------------------------------------------------------------------------------
 
 
