@@ -13,6 +13,9 @@ from skimage import transform
 
 from sklearn.utils import shuffle
 
+import matplotlib.pyplot as plt
+
+
 #------------------------------------------------------------------------------
 # Read image
 #------------------------------------------------------------------------------
@@ -25,7 +28,7 @@ def ReadImage(filename, size):
     
 
 #------------------------------------------------------------------------------
-# Processing data
+# Loading data
 #------------------------------------------------------------------------------
 def LoadData(dataDir, maxData, size, percentageSplit):
        
@@ -85,6 +88,60 @@ def LoadData(dataDir, maxData, size, percentageSplit):
 
 
 #------------------------------------------------------------------------------
+# Processing data
+#------------------------------------------------------------------------------
+def ProcessData(training, validation):
+    
+    meanTraining = np.mean(training['data'], axis=0)    
+    training['mean'] = meanTraining
+    centeredTraining = training['data'] - training['mean']
+    centeredValidation = validation['data'] - training['mean']
+    
+    training['data'] = centeredTraining
+    validation['data'] = centeredValidation
+    
+    return training, validation
+    
+#------------------------------------------------------------------------------
+    
+
+#------------------------------------------------------------------------------
+# Convert data to image
+#------------------------------------------------------------------------------
+def ConvertToImage(data):
+    image = np.reshape(data,(data.shape[0],data.shape[1]))
+    return image
+#------------------------------------------------------------------------------
+    
+
+#------------------------------------------------------------------------------
+# Processing data
+#------------------------------------------------------------------------------
+def PlotSample(training, validation, title, trainingIndex = None, validationIndex = None):
+    
+    NumberSamples = 3
+    if trainingIndex is None:
+        trainingIndex = np.random.randint(0, training['data'].shape[0], size = NumberSamples)
+    if validationIndex is None:
+        validationIndex = np.random.randint(0, validation['data'].shape[0], size = NumberSamples)
+    
+    fig, axarr = plt.subplots(2, NumberSamples)   
+    fig.suptitle(title)
+    for i in np.arange(NumberSamples):
+        trainImage = ConvertToImage(training['data'][trainingIndex[i]])
+        validationImage = ConvertToImage(validation['data'][validationIndex[i]])
+        axarr[0, i].imshow(trainImage, cmap=plt.cm.gray)
+        axarr[0, i].set_title('training image ' + str(trainingIndex[i]) )
+        axarr[1, i].imshow(validationImage, cmap=plt.cm.gray)
+        axarr[1, i].set_title('validation image ' + str(validationIndex[i]) )
+    
+    plt.show()
+    
+    return trainingIndex, validationIndex
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
 # Application
 #------------------------------------------------------------------------------
 def main():    
@@ -118,8 +175,12 @@ def main():
         args.maxData = len(os.listdir(args.dataDir))
     
     training, validation = LoadData(args.dataDir, args.maxData, args.size, args.precentageSplit)
-    np.save(args.trainingDataFile, training)
+    trainingIndex, validationIndex = PlotSample(training, validation, "Original data")
     
+    training, validation = ProcessData(training, validation)
+    PlotSample(training, validation, "Processed data", trainingIndex, validationIndex)
+    
+    np.save(args.trainingDataFile, training)
     if args.validationDataFile != None:
         np.save(args.validationDataFile, validation)
         
