@@ -146,7 +146,7 @@ def PlotSample(training, validation, title, trainingIndex = None, validationInde
 #------------------------------------------------------------------------------
 def main():    
     parser = argparse.ArgumentParser(
-        description = 'Preprcoss Data script',
+        description = 'Preprocess Data script',
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('dataDir',
                         type = str,
