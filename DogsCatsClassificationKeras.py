@@ -90,11 +90,11 @@ def main():
                         help = 'file to store the training history.')
     parser.add_argument('-e', '--epochs',
                         type = int,
-                        default = 200,
+                        default = 100,
                         help = 'Number of epochs for trainig data.')
     parser.add_argument('-lr', '--learningRate',
                         type = float,
-                        default = 1e-6,
+                        default = 1e-3,
                         help = 'Learning rate for training.')
     parser.add_argument('-b', '--batchSize',
                         type = int,
