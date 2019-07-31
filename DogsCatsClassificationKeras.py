@@ -29,7 +29,7 @@ def SaveHistory(csvFilename, history):
 #------------------------------------------------------------------------------
 # CNN creation
 #------------------------------------------------------------------------------
-def CreateModel(dataSize):
+def CreateModel(dataSize, learningRate):
     
     model = Sequential()
     model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=dataSize))
@@ -40,6 +40,9 @@ def CreateModel(dataSize):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
+
+    optimizer = keras.optimizers.Adam(lr=learningRate)
+    model.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics=['accuracy'])
     
     return model
 #------------------------------------------------------------------------------
@@ -48,18 +51,14 @@ def CreateModel(dataSize):
 #------------------------------------------------------------------------------
 # Fit the model
 #------------------------------------------------------------------------------
-def FitModel(model, training, learningRate, epochs, batchSize, validation = None):
+def FitModel(model, training, epochs, startingEpoch, batchSize, validation = None):
     
-    # Optimizer
-    optimizer = keras.optimizers.Adam(lr=learningRate)
-    model.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics=['accuracy'])
-    model.summary()
-
     history = model.fit(training['data'],
                         training['label'], 
                         epochs = epochs, 
                         verbose = 2,
-                        batch_size = batchSize, 
+                        batch_size = batchSize,
+                        shuffle = False,
                         validation_data = validation)
     
     return history
@@ -92,6 +91,11 @@ def main():
                         type = int,
                         default = 100,
                         help = 'Number of epochs for trainig data.')
+    parser.add_argument('-se', '--startingEpoch',
+                        type = int,
+                        nargs = '?',
+                        default = 0,
+                        help = 'Starting epoch (useful to resume).')
     parser.add_argument('-lr', '--learningRate',
                         type = float,
                         default = 1e-3,
@@ -100,6 +104,10 @@ def main():
                         type = int,
                         default = 64,
                         help = 'Learning rate for training.')
+    parser.add_argument('-lw', '--weightLoadFile',
+                        type = str,
+                        nargs = '?',
+                        help = 'file from which to load the Weights.')
     args = parser.parse_args()
     
     # Get training data shape
@@ -109,21 +117,28 @@ def main():
             'label': trainingData.item().get('label')}
     dataSize = training['data'][0].shape
     
-    # Get validationdata
+    # Get validation data
     validation = None
     if args.validationDataFile is not None:
         data = np.load(args.validationDataFile)
         validation = (data.item().get('data'), data.item().get('label'))
         
     # Create the model
-    model = CreateModel(dataSize)
+    model = CreateModel(dataSize, args.learningRate)
+    
+    # Load Weigths
+    if args.weightLoadFile is not None:
+        model.load_weights(args.weightLoadFile)
+        
+    # Print the model    
+    model.summary()
     
     # Fit model
     trainingHistory = FitModel(model, 
-                               training, 
-                               args.learningRate, 
+                               training,                                
                                args.epochs, 
-                               args.batchSize, 
+                               args.startingEpoch,
+                               args.batchSize,
                                validation = validation)
     
     # save history
