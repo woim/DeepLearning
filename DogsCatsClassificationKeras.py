@@ -21,8 +21,8 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense#, Activation
 def SaveHistory(csvFilename, history):
     hist_df = pd.DataFrame(history.history) 
     hist_csv_file = csvFilename
-    with open(hist_csv_file, mode='w') as f:
-        hist_df.to_csv(f)
+    with open(hist_csv_file, mode='w', newline='\n') as f:
+        hist_df.to_csv(f, float_format='%.12f')
 #------------------------------------------------------------------------------
 
 
@@ -51,14 +51,14 @@ def CreateModel(dataSize, learningRate):
 #------------------------------------------------------------------------------
 # Fit the model
 #------------------------------------------------------------------------------
-def FitModel(model, training, epochs, startingEpoch, batchSize, validation = None):
+def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validation = None):
     
     history = model.fit(training['data'],
                         training['label'], 
                         epochs = epochs, 
                         verbose = 2,
                         batch_size = batchSize,
-                        shuffle = False,
+                        shuffle = shuffle,
                         validation_data = validation)
     
     return history
@@ -104,6 +104,9 @@ def main():
                         type = int,
                         default = 64,
                         help = 'Learning rate for training.')
+    parser.add_argument('-seq', '--sequential',
+                        action = 'store_true',
+                        help = 'train sequentially on the batch.')
     parser.add_argument('-lw', '--weightLoadFile',
                         type = str,
                         nargs = '?',
@@ -113,7 +116,7 @@ def main():
     # Get training data shape
     trainingData = np.load(args.trainingDataFile)
     training = {
-            'data': trainingData.item().get('data') ,
+            'data':  trainingData.item().get('data') ,
             'label': trainingData.item().get('label')}
     dataSize = training['data'][0].shape
     
@@ -134,11 +137,13 @@ def main():
     model.summary()
     
     # Fit model
+    shuffle = not args.sequential
     trainingHistory = FitModel(model, 
                                training,                                
                                args.epochs, 
                                args.startingEpoch,
                                args.batchSize,
+                               shuffle,
                                validation = validation)
     
     # save history
