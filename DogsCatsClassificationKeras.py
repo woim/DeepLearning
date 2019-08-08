@@ -16,7 +16,7 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense#, Activation
 
 
 #------------------------------------------------------------------------------
-# Variables
+# Save function
 #------------------------------------------------------------------------------
 def SaveHistory(csvFilename, history):
     hist_df = pd.DataFrame(history.history) 
