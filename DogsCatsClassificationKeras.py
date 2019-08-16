@@ -111,6 +111,9 @@ def main():
                         type = str,
                         nargs = '?',
                         help = 'file from which to load the Weights.')
+    parser.add_argument('--dryRun',
+                        action = 'store_true',
+                        help = 'dry run without any training.')
     args = parser.parse_args()
     
     # Get training data shape
@@ -138,18 +141,19 @@ def main():
     
     # Fit model
     shuffle = not args.sequential
-    trainingHistory = FitModel(model, 
-                               training,                                
-                               args.epochs, 
-                               args.startingEpoch,
-                               args.batchSize,
-                               shuffle,
-                               validation = validation)
-    
-    # save history
-    if args.trainingHistoryFile is not None:
-        SaveHistory(args.trainingHistoryFile, trainingHistory)
+    if not args.dryRun:        
+        trainingHistory = FitModel(model, 
+                                   training,                                
+                                   args.epochs, 
+                                   args.startingEpoch,
+                                   args.batchSize,
+                                   shuffle,
+                                   validation = validation)
         
+        # save history
+        if args.trainingHistoryFile is not None:
+            SaveHistory(args.trainingHistoryFile, trainingHistory)
+            
     # save model
     if args.modelFile is not None:
         model.save(args.modelFile)
