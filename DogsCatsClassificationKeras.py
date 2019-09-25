@@ -19,7 +19,7 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense#, Activation
 # Save function
 #------------------------------------------------------------------------------
 def SaveHistory(csvFilename, history):
-    hist_df = pd.DataFrame(history.history) 
+    hist_df = pd.DataFrame(history.history)
     hist_csv_file = csvFilename
     with open(hist_csv_file, mode='w', newline='\n') as f:
         hist_df.to_csv(f, float_format='%.12f')
@@ -29,21 +29,24 @@ def SaveHistory(csvFilename, history):
 #------------------------------------------------------------------------------
 # CNN creation
 #------------------------------------------------------------------------------
-def CreateModel(dataSize, learningRate):
-    
+def CreateModel(dataSize, learningRate, kernelInitializer):
+
     model = Sequential()
-    model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=dataSize))
+    model.add(Conv2D(32, kernel_size=3, activation='relu',
+                     kernel_initializer=kernelInitializer, input_shape=dataSize))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, kernel_size=3, activation='relu'))
+    model.add(Conv2D(64, kernel_size=3, activation='relu',
+                     kernel_initializer=kernelInitializer))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(128, kernel_size=3, activation='relu'))
+    model.add(Conv2D(128, kernel_size=3, activation='relu',
+                     kernel_initializer=kernelInitializer))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
     optimizer = keras.optimizers.Adam(lr=learningRate)
     model.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics=['accuracy'])
-    
+
     return model
 #------------------------------------------------------------------------------
 
@@ -52,23 +55,23 @@ def CreateModel(dataSize, learningRate):
 # Fit the model
 #------------------------------------------------------------------------------
 def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validation = None):
-    
+
     history = model.fit(training['data'],
-                        training['label'], 
-                        epochs = epochs, 
+                        training['label'],
+                        epochs = epochs,
                         verbose = 2,
                         batch_size = batchSize,
                         shuffle = shuffle,
                         validation_data = validation)
-    
+
     return history
 #------------------------------------------------------------------------------
-    
-    
+
+
 #------------------------------------------------------------------------------
 # Application
 #------------------------------------------------------------------------------
-def main():    
+def main():
     parser = argparse.ArgumentParser(
         description = 'fit model',
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -111,49 +114,53 @@ def main():
                         type = str,
                         nargs = '?',
                         help = 'file from which to load the Weights.')
+    parser.add_arguement('-ki','--kernelInitializer',
+                        type = str,
+                        default = 'glorot_uniform',
+                        help = 'Choose kernerl initializer proposed by keras.')
     parser.add_argument('--dryRun',
                         action = 'store_true',
                         help = 'dry run without any training.')
     args = parser.parse_args()
-    
+
     # Get training data shape
     trainingData = np.load(args.trainingDataFile)
     training = {
             'data':  trainingData.item().get('data') ,
             'label': trainingData.item().get('label')}
     dataSize = training['data'][0].shape
-    
+
     # Get validation data
     validation = None
     if args.validationDataFile is not None:
         data = np.load(args.validationDataFile)
         validation = (data.item().get('data'), data.item().get('label'))
-        
+
     # Create the model
-    model = CreateModel(dataSize, args.learningRate)
-    
+    model = CreateModel(dataSize, args.learningRate, args.kernelInitializer)
+
     # Load Weigths
     if args.weightLoadFile is not None:
         model.load_weights(args.weightLoadFile)
-        
-    # Print the model    
+
+    # Print the model
     model.summary()
-    
+
     # Fit model
     shuffle = not args.sequential
-    if not args.dryRun:        
-        trainingHistory = FitModel(model, 
-                                   training,                                
-                                   args.epochs, 
+    if not args.dryRun:
+        trainingHistory = FitModel(model,
+                                   training,
+                                   args.epochs,
                                    args.startingEpoch,
                                    args.batchSize,
                                    shuffle,
                                    validation = validation)
-        
+
         # save history
         if args.trainingHistoryFile is not None:
             SaveHistory(args.trainingHistoryFile, trainingHistory)
-            
+
     # save model
     if args.modelFile is not None:
         model.save(args.modelFile)
