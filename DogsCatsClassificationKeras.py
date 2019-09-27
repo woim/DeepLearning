@@ -80,13 +80,19 @@ def CreateModel(dataSize, learningRate, kernelInitializer):
 #------------------------------------------------------------------------------
 def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validation = None):
 
+    activationHistory = ActivationHistory()
+
     history = model.fit(training['data'],
                         training['label'],
                         epochs = epochs,
                         verbose = 2,
                         batch_size = batchSize,
                         shuffle = shuffle,
-                        validation_data = validation)
+                        validation_data = validation
+                        callbacks = [activationHistory])
+
+    history{'layerMeanActivation'} = activationHistory.layerMeanActivation
+    history{'layerStdActivation'} = activationHistory.layerStdActivation
 
     return history
 #------------------------------------------------------------------------------
