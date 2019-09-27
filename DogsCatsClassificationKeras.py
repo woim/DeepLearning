@@ -38,7 +38,7 @@ class ActivationHistory(keras.callbacks.Callback):
 
     def on_batch_end(self, batch, logs={}):
         self.losses.append(logs.get('loss'))
-        self.activation.append(self.model.layers[0].output())
+        self.activation.append(self.model.layers[0].output)
 
     def on_epoch_begin(self, epoch, logs=None):
         self.activation = []
