@@ -88,7 +88,7 @@ def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validat
                         verbose = 2,
                         batch_size = batchSize,
                         shuffle = shuffle,
-                        validation_data = validation
+                        validation_data = validation,
                         callbacks = [activationHistory])
 
     history{'layerMeanActivation'} = activationHistory.layerMeanActivation
