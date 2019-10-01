@@ -13,6 +13,7 @@ import pandas as pd
 import keras
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense#, Activation
+from keras.models import Model
 
 
 #------------------------------------------------------------------------------
@@ -31,21 +32,26 @@ def SaveHistory(csvFilename, history):
 #------------------------------------------------------------------------------
 class ActivationHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
-        self.losses = []
         self.layerMeanActivation = []
         self.layerStdActivation = []
         self.activation = []
-
-    def on_batch_end(self, batch, logs={}):
-        self.losses.append(logs.get('loss'))
-        self.activation.append(self.model.layers[0].output)
+        self.outputs=[layer.output for layer in self.model.layers]
+        
+    def set_training(self, training):
+        self.trainingData = np.array(training)
 
     def on_epoch_begin(self, epoch, logs=None):
         self.activation = []
 
     def on_epoch_end(self, epoch, logs=None):
-        self.layerMeanActivation.append(np.mean(self.activation))
-        self.layerStdActivation.append(np.std(self.activation))
+        intermediate_layer_model = Model(inputs  = self.model.input,
+                                         outputs = self.model.layers[0].output)
+        intermediate_output = intermediate_layer_model.predict(self.trainingData)
+        meanActivation = np.mean(intermediate_output)
+        stdActivation  = np.std(intermediate_output)        
+        print('Training: batch {} intermediate_output {}'.format(epoch, intermediate_output.shape))
+        print('Training: batch {} mean intermediate_output {}'.format(epoch, meanActivation))
+        print('Training: batch {} std intermediate_output {}'.format(epoch, stdActivation))
 #------------------------------------------------------------------------------
 
 
@@ -81,6 +87,7 @@ def CreateModel(dataSize, learningRate, kernelInitializer):
 def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validation = None):
 
     activationHistory = ActivationHistory()
+    activationHistory.set_training(training['data'])
 
     history = model.fit(training['data'],
                         training['label'],
@@ -91,8 +98,8 @@ def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validat
                         validation_data = validation,
                         callbacks = [activationHistory])
 
-    history.history['layerMeanActivation'] = activationHistory.layerMeanActivation
-    history.history['layerStdActivation'] = activationHistory.layerStdActivation
+#    history.history['layerMeanActivation'] = activationHistory.layerMeanActivation
+#    history.history['layerStdActivation'] = activationHistory.layerStdActivation
 
     return history
 #------------------------------------------------------------------------------
@@ -131,7 +138,7 @@ def main():
                         help = 'Starting epoch (useful to resume).')
     parser.add_argument('-lr', '--learningRate',
                         type = float,
-                        default = 1e-3,
+                        default = 1e-4,
                         help = 'Learning rate for training.')
     parser.add_argument('-b', '--batchSize',
                         type = int,
@@ -144,10 +151,10 @@ def main():
                         type = str,
                         nargs = '?',
                         help = 'file from which to load the Weights.')
-    parser.add_arguement('-ki','--kernelInitializer',
+    parser.add_argument('-ki','--kernelInitializer',
                         type = str,
                         default = 'glorot_uniform',
-                        help = 'Choose kernerl initializer proposed by keras.')
+                        help = 'Choose kernel initializer proposed by keras.')
     parser.add_argument('--dryRun',
                         action = 'store_true',
                         help = 'dry run without any training.')
