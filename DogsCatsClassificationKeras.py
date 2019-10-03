@@ -31,27 +31,39 @@ def SaveHistory(csvFilename, history):
 # Callback
 #------------------------------------------------------------------------------
 class ActivationHistory(keras.callbacks.Callback):
-    def on_train_begin(self, logs={}):
-        self.layerMeanActivation = []
-        self.layerStdActivation = []
-        self.activation = []
-        self.outputs=[layer.output for layer in self.model.layers]
         
+    def __init__(self):
+        self.layersIndex = []
+        self.history     = {}
+                
     def set_training(self, training):
         self.trainingData = np.array(training)
-
-    def on_epoch_begin(self, epoch, logs=None):
-        self.activation = []
+        
+    def set_layers(self, layersIndex):
+        self.layersIndex = layersIndex
+        for index in self.layersIndex:
+            self.history[self.get_layer_name(index)] = {'mean': [], 'std': []}
+    
+    def get_layer_name(self, index):
+        return 'layer' + str(index)
+    
+    def format_history(self):
+        formatted_history = {}
+        for index in self.layersIndex:
+            formatted_history[self.get_layer_name(index) + '_mean'] = self.history[self.get_layer_name(index)]['mean']
+            formatted_history[self.get_layer_name(index) + '_std']  = self.history[self.get_layer_name(index)]['std']
+        return formatted_history
 
     def on_epoch_end(self, epoch, logs=None):
-        intermediate_layer_model = Model(inputs  = self.model.input,
-                                         outputs = self.model.layers[0].output)
-        intermediate_output = intermediate_layer_model.predict(self.trainingData)
-        meanActivation = np.mean(intermediate_output)
-        stdActivation  = np.std(intermediate_output)        
-        print('Training: batch {} intermediate_output {}'.format(epoch, intermediate_output.shape))
-        print('Training: batch {} mean intermediate_output {}'.format(epoch, meanActivation))
-        print('Training: batch {} std intermediate_output {}'.format(epoch, stdActivation))
+        for index in self.layersIndex:
+            intermediate_layer_model = Model(inputs  = self.model.input,
+                                             outputs = self.model.layers[index].output)
+            intermediate_output = intermediate_layer_model.predict(self.trainingData)
+            mean = np.mean(intermediate_output)
+            std  = np.std(intermediate_output)
+            self.history[self.get_layer_name(index)]['mean'].append(mean)
+            self.history[self.get_layer_name(index)]['std'].append(std) 
+            print('Epoch {} layer {}: mean = {} std = {}'.format(epoch, self.get_layer_name(index), mean, std))
 #------------------------------------------------------------------------------
 
 
@@ -76,7 +88,7 @@ def CreateModel(dataSize, learningRate, kernelInitializer):
 
     optimizer = keras.optimizers.Adam(lr=learningRate)
     model.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics=['accuracy'])
-
+    
     return model
 #------------------------------------------------------------------------------
 
@@ -84,11 +96,15 @@ def CreateModel(dataSize, learningRate, kernelInitializer):
 #------------------------------------------------------------------------------
 # Fit the model
 #------------------------------------------------------------------------------
-def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validation = None):
+def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, layersIndex, validation = None):
 
-    activationHistory = ActivationHistory()
-    activationHistory.set_training(training['data'])
-
+    monitor = []
+    if layersIndex is not None:
+        activationHistory = ActivationHistory()
+        activationHistory.set_training(training['data'])
+        activationHistory.set_layers(layersIndex)
+        monitor.append(activationHistory)
+ 
     history = model.fit(training['data'],
                         training['label'],
                         epochs = epochs,
@@ -96,11 +112,13 @@ def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, validat
                         batch_size = batchSize,
                         shuffle = shuffle,
                         validation_data = validation,
-                        callbacks = [activationHistory])
+                        callbacks = monitor)
 
-#    history.history['layerMeanActivation'] = activationHistory.layerMeanActivation
-#    history.history['layerStdActivation'] = activationHistory.layerStdActivation
-
+    if layersIndex is not None:
+        activationHistory = monitor[0].format_history()
+        for key in activationHistory:
+            history.history[key] = activationHistory[key]
+                        
     return history
 #------------------------------------------------------------------------------
 
@@ -155,6 +173,10 @@ def main():
                         type = str,
                         default = 'glorot_uniform',
                         help = 'Choose kernel initializer proposed by keras.')
+    parser.add_argument('-li', '--layersIndex',
+                        type = int,
+                        nargs = '*',
+                        help = 'list of layers index to monitor during training.')
     parser.add_argument('--dryRun',
                         action = 'store_true',
                         help = 'dry run without any training.')
@@ -192,6 +214,7 @@ def main():
                                    args.startingEpoch,
                                    args.batchSize,
                                    shuffle,
+                                   args.layersIndex,
                                    validation = validation)
 
         # save history
