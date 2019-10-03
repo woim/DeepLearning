@@ -63,7 +63,7 @@ class ActivationHistory(keras.callbacks.Callback):
             std  = np.std(intermediate_output)
             self.history[self.get_layer_name(index)]['mean'].append(mean)
             self.history[self.get_layer_name(index)]['std'].append(std) 
-            print('Epoch {} layer {}: mean = {} std = {}'.format(epoch, self.get_layer_name(index), mean, std))
+            #print('Epoch {} layer {}: mean = {} std = {}'.format(epoch, self.get_layer_name(index), mean, std))
 #------------------------------------------------------------------------------
 
 
@@ -96,7 +96,16 @@ def CreateModel(dataSize, learningRate, kernelInitializer):
 #------------------------------------------------------------------------------
 # Fit the model
 #------------------------------------------------------------------------------
-def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, layersIndex, validation = None):
+def FitModel(
+        model, 
+        training, 
+        epochs, 
+        startingEpoch, 
+        batchSize, 
+        shuffle, 
+        layersIndex, 
+        verbose = 0, 
+        validation = None):
 
     monitor = []
     if layersIndex is not None:
@@ -108,7 +117,7 @@ def FitModel(model, training, epochs, startingEpoch, batchSize, shuffle, layersI
     history = model.fit(training['data'],
                         training['label'],
                         epochs = epochs,
-                        verbose = 2,
+                        verbose = verbose,
                         batch_size = batchSize,
                         shuffle = shuffle,
                         validation_data = validation,
@@ -215,6 +224,7 @@ def main():
                                    args.batchSize,
                                    shuffle,
                                    args.layersIndex,
+                                   0,
                                    validation = validation)
 
         # save history
