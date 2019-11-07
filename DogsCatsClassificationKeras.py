@@ -12,7 +12,7 @@ import pandas as pd
 
 import keras
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense#, Activation
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, Activation
 from keras.models import Model
 
 
@@ -71,18 +71,28 @@ class ActivationHistory(keras.callbacks.Callback):
 #------------------------------------------------------------------------------
 # CNN creation
 #------------------------------------------------------------------------------
-def CreateModel(dataSize, learningRate, kernelInitializer):
+def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
 
     model = Sequential()
-    model.add(Conv2D(32, kernel_size=3, activation='relu',
-                     kernel_initializer=kernelInitializer, input_shape=dataSize))
+    model.add(Conv2D(32, kernel_size=3, kernel_initializer=kernelInitializer,
+                     input_shape=dataSize))    
+    if batchNormalization == True:
+        model.add(BatchNormalization())    
+    model.add(Activation('relu'))        
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, kernel_size=3, activation='relu',
-                     kernel_initializer=kernelInitializer))
+    
+    model.add(Conv2D(64, kernel_size=3, kernel_initializer=kernelInitializer))    
+    if batchNormalization == True:
+        model.add(BatchNormalization())    
+    model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(128, kernel_size=3, activation='relu',
-                     kernel_initializer=kernelInitializer))
+    
+    model.add(Conv2D(128, kernel_size=3, kernel_initializer=kernelInitializer))
+    if batchNormalization == True:
+        model.add(BatchNormalization())    
+    model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
@@ -180,7 +190,7 @@ def main():
                         help = 'file from which to load the Weights.')
     parser.add_argument('-ki','--kernelInitializer',
                         type = str,
-                        default = 'glorot_uniform',
+                        default = 'he_normal',
                         help = 'Choose kernel initializer proposed by keras.')
     parser.add_argument('-li', '--layersIndex',
                         type = int,
@@ -189,6 +199,9 @@ def main():
     parser.add_argument('--dryRun',
                         action = 'store_true',
                         help = 'dry run without any training.')
+    parser.add_argument('-bNorm', '--batchNormalization',
+                        action = 'store_true',
+                        help = 'Perform batch normalization before activation function.')
     args = parser.parse_args()
 
     # Get training data shape
@@ -205,7 +218,10 @@ def main():
         validation = (data.item().get('data'), data.item().get('label'))
 
     # Create the model
-    model = CreateModel(dataSize, args.learningRate, args.kernelInitializer)
+    model = CreateModel(dataSize, 
+                        args.learningRate,
+                        args.kernelInitializer, 
+                        args.batchNormalization)
 
     # Load Weigths
     if args.weightLoadFile is not None:
@@ -216,6 +232,7 @@ def main():
 
     # Fit model
     shuffle = not args.sequential
+    args.batchNormalization
     if not args.dryRun:
         trainingHistory = FitModel(model,
                                    training,
