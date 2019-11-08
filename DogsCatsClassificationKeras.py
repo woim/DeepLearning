@@ -74,23 +74,39 @@ class ActivationHistory(keras.callbacks.Callback):
 def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
 
     model = Sequential()
+    
     model.add(Conv2D(32, kernel_size=3, kernel_initializer=kernelInitializer,
                      input_shape=dataSize))    
-    if batchNormalization == True:
+    if batchNormalization == 'preActivation':
         model.add(BatchNormalization())    
-    model.add(Activation('relu'))        
+        model.add(Activation('relu'))  
+    elif batchNormalization == 'postActivation':
+        model.add(Activation('relu')) 
+        model.add(BatchNormalization())
+    else:
+        model.add(Activation('relu'))         
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Conv2D(64, kernel_size=3, kernel_initializer=kernelInitializer))    
-    if batchNormalization == True:
+    if batchNormalization == 'preActivation':
         model.add(BatchNormalization())    
-    model.add(Activation('relu'))
+        model.add(Activation('relu'))  
+    elif batchNormalization == 'postActivation':
+        model.add(Activation('relu')) 
+        model.add(BatchNormalization())
+    else:
+        model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Conv2D(128, kernel_size=3, kernel_initializer=kernelInitializer))
-    if batchNormalization == True:
+    if batchNormalization == 'preActivation':
         model.add(BatchNormalization())    
-    model.add(Activation('relu'))
+        model.add(Activation('relu'))  
+    elif batchNormalization == 'postActivation':
+        model.add(Activation('relu')) 
+        model.add(BatchNormalization())
+    else:
+        model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Flatten())
@@ -200,7 +216,10 @@ def main():
                         action = 'store_true',
                         help = 'dry run without any training.')
     parser.add_argument('-bNorm', '--batchNormalization',
-                        action = 'store_true',
+                        type = str,
+                        nargs = '?',
+                        default = None,
+                        choices = ['preActivation', 'postActivation']
                         help = 'Perform batch normalization before activation function.')
     args = parser.parse_args()
 
