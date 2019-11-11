@@ -219,7 +219,7 @@ def main():
                         type = str,
                         nargs = '?',
                         default = None,
-                        choices = ['preActivation', 'postActivation']
+                        choices = ['preActivation', 'postActivation'],
                         help = 'Perform batch normalization before activation function.')
     args = parser.parse_args()
 
