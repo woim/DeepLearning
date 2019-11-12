@@ -12,7 +12,7 @@ import pandas as pd
 
 import keras
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, Activation
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, Activation, Lambda
 from keras.models import Model
 
 
@@ -84,6 +84,7 @@ def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
         model.add(Activation('relu')) 
         model.add(BatchNormalization())
     else:
+        model.add(Lambda(lambda x: x))
         model.add(Activation('relu'))         
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
@@ -95,6 +96,7 @@ def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
         model.add(Activation('relu')) 
         model.add(BatchNormalization())
     else:
+        model.add(Lambda(lambda x: x))
         model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
@@ -106,6 +108,7 @@ def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
         model.add(Activation('relu')) 
         model.add(BatchNormalization())
     else:
+        model.add(Lambda(lambda x: x))
         model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
