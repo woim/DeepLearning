@@ -71,7 +71,7 @@ class ActivationHistory(keras.callbacks.Callback):
 #------------------------------------------------------------------------------
 # CNN creation
 #------------------------------------------------------------------------------
-def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
+def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization):
 
     model = Sequential()
     
@@ -260,8 +260,7 @@ def main():
     # Create the model
     model = CreateModel(dataSize, 
                         args.learningRate,
-                        args.kernelInitializer, 
-                        args.batchNormalization)
+                        args.kernelInitializer)
 
     # Load Weigths
     if args.weightLoadFile is not None:
