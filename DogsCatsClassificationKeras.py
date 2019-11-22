@@ -75,45 +75,61 @@ def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
 
     model = Sequential()
     
-    model.add(Conv2D(32, kernel_size=3, kernel_initializer=kernelInitializer,
-                     input_shape=dataSize))    
-    if batchNormalization == 'preActivation':
-        model.add(BatchNormalization())    
-        model.add(Activation('relu'))  
-    elif batchNormalization == 'postActivation':
-        model.add(Activation('relu')) 
-        model.add(BatchNormalization())
-    else:
-        model.add(Lambda(lambda x: x))
-        model.add(Activation('relu'))         
+#    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu',
+#                     kernel_initializer=kernelInitializer, input_shape=dataSize))    
+#    if batchNormalization == 'preActivation':
+#        model.add(BatchNormalization())    
+#        model.add(Activation('relu'))  
+#    elif batchNormalization == 'postActivation':
+#        model.add(Activation('relu')) 
+#        model.add(BatchNormalization())
+#    else:
+#        model.add(Lambda(lambda x: x))
+#        model.add(Activation('relu'))     
+    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu',
+                     kernel_initializer=kernelInitializer, input_shape=dataSize))
+    model.add(BatchNormalization())
+    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu',
+                     kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
-    model.add(Conv2D(64, kernel_size=3, kernel_initializer=kernelInitializer))    
-    if batchNormalization == 'preActivation':
-        model.add(BatchNormalization())    
-        model.add(Activation('relu'))  
-    elif batchNormalization == 'postActivation':
-        model.add(Activation('relu')) 
-        model.add(BatchNormalization())
-    else:
-        model.add(Lambda(lambda x: x))
-        model.add(Activation('relu'))
+#    model.add(Conv2D(64, kernel_size=3, kernel_initializer=kernelInitializer))    
+#    if batchNormalization == 'preActivation':
+#        model.add(BatchNormalization())    
+#        model.add(Activation('relu'))  
+#    elif batchNormalization == 'postActivation':
+#        model.add(Activation('relu')) 
+#        model.add(BatchNormalization())
+#    else:
+#        model.add(Lambda(lambda x: x))
+#        model.add(Activation('relu'))
+    model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
+    model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
-    model.add(Conv2D(128, kernel_size=3, kernel_initializer=kernelInitializer))
-    if batchNormalization == 'preActivation':
-        model.add(BatchNormalization())    
-        model.add(Activation('relu'))  
-    elif batchNormalization == 'postActivation':
-        model.add(Activation('relu')) 
-        model.add(BatchNormalization())
-    else:
-        model.add(Lambda(lambda x: x))
-        model.add(Activation('relu'))
+#    model.add(Conv2D(128, kernel_size=3, kernel_initializer=kernelInitializer))
+#    if batchNormalization == 'preActivation':
+#        model.add(BatchNormalization())    
+#        model.add(Activation('relu'))  
+#    elif batchNormalization == 'postActivation':
+#        model.add(Activation('relu')) 
+#        model.add(BatchNormalization())
+#    else:
+#        model.add(Lambda(lambda x: x))
+#        model.add(Activation('relu'))
+    model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Flatten())
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(64, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dense(1,  activation='sigmoid'))
 
     optimizer = keras.optimizers.Adam(lr=learningRate)
     model.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics=['accuracy'])
@@ -218,12 +234,12 @@ def main():
     parser.add_argument('--dryRun',
                         action = 'store_true',
                         help = 'dry run without any training.')
-    parser.add_argument('-bNorm', '--batchNormalization',
-                        type = str,
-                        nargs = '?',
-                        default = None,
-                        choices = ['preActivation', 'postActivation'],
-                        help = 'Perform batch normalization before activation function.')
+#    parser.add_argument('-bNorm', '--batchNormalization',
+#                        type = str,
+#                        nargs = '?',
+#                        default = None,
+#                        choices = ['preActivation', 'postActivation'],
+#                        help = 'Perform batch normalization before activation function.')
     args = parser.parse_args()
 
     # Get training data shape
