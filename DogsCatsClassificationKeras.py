@@ -127,7 +127,9 @@ def CreateModel(dataSize, learningRate, kernelInitializer, batchNormalization):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Flatten())
-    model.add(Dense(64, activation='relu'))
+    model.add(Dense(4096, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dense(2048, activation='relu'))
     model.add(BatchNormalization())
     model.add(Dense(1,  activation='sigmoid'))
 
