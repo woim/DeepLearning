@@ -12,7 +12,8 @@ import pandas as pd
 
 import keras
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, Activation, Lambda
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, \
+    BatchNormalization, Activation, Lambda
 from keras.models import Model
 
 
@@ -50,8 +51,10 @@ class ActivationHistory(keras.callbacks.Callback):
     def format_history(self):
         formatted_history = {}
         for index in self.layersIndex:
-            formatted_history[self.get_layer_name(index) + '_mean'] = self.history[self.get_layer_name(index)]['mean']
-            formatted_history[self.get_layer_name(index) + '_std']  = self.history[self.get_layer_name(index)]['std']
+            formatted_history[self.get_layer_name(index) + '_mean'] = \
+                self.history[self.get_layer_name(index)]['mean']
+            formatted_history[self.get_layer_name(index) + '_std']  = \
+                self.history[self.get_layer_name(index)]['std']
         return formatted_history
 
     def on_epoch_end(self, epoch, logs=None):
@@ -86,50 +89,36 @@ def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization
 #    else:
 #        model.add(Lambda(lambda x: x))
 #        model.add(Activation('relu'))     
-    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu',
+    model.add(Conv2D(16, kernel_size=3, activation='relu',
                      kernel_initializer=kernelInitializer, input_shape=dataSize))
     model.add(BatchNormalization())
-    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu',
+    model.add(Conv2D(16, kernel_size=3, padding='same', activation='relu',
                      kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    
-#    model.add(Conv2D(64, kernel_size=3, kernel_initializer=kernelInitializer))    
-#    if batchNormalization == 'preActivation':
-#        model.add(BatchNormalization())    
-#        model.add(Activation('relu'))  
-#    elif batchNormalization == 'postActivation':
-#        model.add(Activation('relu')) 
-#        model.add(BatchNormalization())
-#    else:
-#        model.add(Lambda(lambda x: x))
-#        model.add(Activation('relu'))
-    model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+
+    model.add(Conv2D(32, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
+    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(64, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
     model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
-#    model.add(Conv2D(128, kernel_size=3, kernel_initializer=kernelInitializer))
-#    if batchNormalization == 'preActivation':
-#        model.add(BatchNormalization())    
-#        model.add(Activation('relu'))  
-#    elif batchNormalization == 'postActivation':
-#        model.add(Activation('relu')) 
-#        model.add(BatchNormalization())
-#    else:
-#        model.add(Lambda(lambda x: x))
-#        model.add(Activation('relu'))
-    model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(Conv2D(128, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
     model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Flatten())
-    model.add(Dense(4096, activation='relu'))
+    model.add(Dense(512, activation='relu'))
     model.add(BatchNormalization())
-    model.add(Dense(2048, activation='relu'))
+    model.add(Dense(206, activation='relu'))
     model.add(BatchNormalization())
     model.add(Dense(1,  activation='sigmoid'))
 
@@ -245,7 +234,7 @@ def main():
     args = parser.parse_args()
 
     # Get training data shape
-    trainingData = np.load(args.trainingDataFile)
+    trainingData = np.load(args.trainingDataFile, allow_pickle=True)
     training = {
             'data':  trainingData.item().get('data') ,
             'label': trainingData.item().get('label')}
@@ -254,7 +243,7 @@ def main():
     # Get validation data
     validation = None
     if args.validationDataFile is not None:
-        data = np.load(args.validationDataFile)
+        data = np.load(args.validationDataFile, allow_pickle=True)
         validation = (data.item().get('data'), data.item().get('label'))
 
     # Create the model
@@ -271,7 +260,7 @@ def main():
 
     # Fit model
     shuffle = not args.sequential
-    args.batchNormalization
+    #args.batchNormalization
     if not args.dryRun:
         trainingHistory = FitModel(model,
                                    training,
