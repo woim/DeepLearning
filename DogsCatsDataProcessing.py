@@ -7,6 +7,7 @@ Created on Tue Jun  4 12:55:02 2019
 import argparse
 import os
 import numpy as np
+import pandas as pd
 
 from skimage import io
 from skimage import transform
@@ -88,6 +89,66 @@ def LoadData(dataDir, maxData, size, percentageSplit):
 
 
 #------------------------------------------------------------------------------
+# Loading data in dataframe
+#------------------------------------------------------------------------------
+def LoadDataInDF(dataDir, maxData, size, percentageSplit):
+       
+    files           = shuffle(os.listdir(dataDir), random_state=0)
+    countCats       = 0
+    countDogs       = 0
+    trainingcount   = 0
+    validationCount = 0
+    count           = 0
+    
+    trainingSize    = int(maxData*(1-percentageSplit))
+    validationSize  = int(maxData*percentageSplit)
+    trainData       = []
+    trainLabel      = []
+    validationData  = []
+    validationLabel = []
+
+    print("numberCats: {}".format(maxData/2))
+    print("numberDogs: {}".format(maxData/2))
+    print("trainingSize: {}".format(trainingSize))
+    print("validationSize: {}".format(validationSize))
+    
+    while countCats + countDogs < maxData:
+        filename = files[count]        
+        if filename.startswith("cat") and countCats < maxData/2 :
+            if countCats < trainingSize/2:
+                trainLabel.append(1)
+                trainData.append(filename)
+                trainingcount += 1
+            else:
+                validationLabel.append(1)
+                validationData.append(filename)
+                validationCount += 1
+            countCats += 1
+            
+        elif filename.startswith("dog") and countDogs < maxData/2 :
+            if countDogs < trainingSize/2:
+                trainLabel.append(0)
+                trainData.append(filename)
+                trainingcount += 1
+            else:
+                validationLabel.append(0)
+                validationData.append(filename)
+                validationCount += 1
+            countDogs += 1
+
+        count += 1
+        print('\rcats: {}% \tDogs: {}%'.format(100*countCats/(maxData/2), 100*countDogs/(maxData/2)), end="")
+    
+    print()
+ 
+    trainingData = pd.DataFrame({'filename': trainData, 'class': trainLabel})
+    testingData = pd.DataFrame({'filename': validationData, 'class': validationLabel})
+
+    return trainingData, testingData
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
 # Processing data
 #------------------------------------------------------------------------------
 def ProcessData(training, validation):
@@ -100,8 +161,7 @@ def ProcessData(training, validation):
     training['data'] = centeredTraining
     validation['data'] = centeredValidation
     
-    return training, validation
-    
+    return training, validation    
 #------------------------------------------------------------------------------
     
 
@@ -169,21 +229,31 @@ def main():
                         type = float,
                         default = 0.2,
                         help = 'Percentage split between training and validation.')
+    parser.add_argument('-d', '--dataFrame',
+                        action = 'store_true',
+                        help = 'store the data as data frame.')
     args = parser.parse_args()
 	    
     if args.maxData == None:
         args.maxData = len(os.listdir(args.dataDir))
-    
-    training, validation = LoadData(args.dataDir, args.maxData, args.size, args.precentageSplit)
-    trainingIndex, validationIndex = PlotSample(training, validation, "Original data")
-    
-    training, validation = ProcessData(training, validation)
-    PlotSample(training, validation, "Processed data", trainingIndex, validationIndex)
-    
-    np.save(args.trainingDataFile, training)
-    if args.validationDataFile != None:
-        np.save(args.validationDataFile, validation)
+
+    if args.dataFrame == True:
+
+        training, validation = LoadDataInDF(args.dataDir, args.maxData, args.size, args.precentageSplit)
+        training.to_csv(args.trainingDataFile, index=False)
+        if args.validationDataFile != None:
+            validation.to_csv(args.validationDataFile, index=False)
+
+    else:
         
+        training, validation = LoadData(args.dataDir, args.maxData, args.size, args.precentageSplit)
+        trainingIndex, validationIndex = PlotSample(training, validation, "Original data")
+        training, validation = ProcessData(training, validation)
+        PlotSample(training, validation, "Processed data", trainingIndex, validationIndex)
+    
+        np.save(args.trainingDataFile, training)
+        if args.validationDataFile != None:
+            np.save(args.validationDataFile, validation)
 #------------------------------------------------------------------------------
 
 
