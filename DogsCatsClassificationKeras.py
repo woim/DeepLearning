@@ -77,18 +77,7 @@ class ActivationHistory(keras.callbacks.Callback):
 def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization):
 
     model = Sequential()
-    
-#    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu',
-#                     kernel_initializer=kernelInitializer, input_shape=dataSize))    
-#    if batchNormalization == 'preActivation':
-#        model.add(BatchNormalization())    
-#        model.add(Activation('relu'))  
-#    elif batchNormalization == 'postActivation':
-#        model.add(Activation('relu')) 
-#        model.add(BatchNormalization())
-#    else:
-#        model.add(Lambda(lambda x: x))
-#        model.add(Activation('relu'))     
+
     model.add(Conv2D(16, kernel_size=3, activation='relu',
                      kernel_initializer=kernelInitializer, input_shape=dataSize))
     model.add(BatchNormalization())
