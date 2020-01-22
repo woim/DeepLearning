@@ -91,7 +91,7 @@ def LoadData(dataDir, maxData, size, percentageSplit):
 #------------------------------------------------------------------------------
 # Loading data in dataframe
 #------------------------------------------------------------------------------
-def LoadDataInDF(dataDir, maxData, size, percentageSplit):
+def LoadDataInDF(dataDir, maxData, percentageSplit):
        
     files           = shuffle(os.listdir(dataDir), random_state=0)
     countCats       = 0
@@ -239,7 +239,7 @@ def main():
 
     if args.dataFrame == True:
 
-        training, validation = LoadDataInDF(args.dataDir, args.maxData, args.size, args.precentageSplit)
+        training, validation = LoadDataInDF(args.dataDir, args.maxData, args.precentageSplit)
         training.to_csv(args.trainingDataFile, index=False)
         if args.validationDataFile != None:
             validation.to_csv(args.validationDataFile, index=False)
