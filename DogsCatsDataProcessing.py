@@ -116,22 +116,22 @@ def LoadDataInDF(dataDir, maxData, percentageSplit):
         filename = files[count]        
         if filename.startswith("cat") and countCats < maxData/2 :
             if countCats < trainingSize/2:
-                trainLabel.append("1")
+                trainLabel.append("cat")
                 trainData.append(filename)
                 trainingcount += 1
             else:
-                validationLabel.append("1")
+                validationLabel.append("cat")
                 validationData.append(filename)
                 validationCount += 1
             countCats += 1
             
         elif filename.startswith("dog") and countDogs < maxData/2 :
             if countDogs < trainingSize/2:
-                trainLabel.append("0")
+                trainLabel.append("dog")
                 trainData.append(filename)
                 trainingcount += 1
             else:
-                validationLabel.append("0")
+                validationLabel.append("dog")
                 validationData.append(filename)
                 validationCount += 1
             countDogs += 1
