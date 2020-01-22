@@ -101,7 +101,7 @@ def LoadDataInDF(dataDir, maxData, percentageSplit):
     count           = 0
     
     trainingSize    = int(maxData*(1-percentageSplit))
-    validationSize  = int(maxData*percentageSplit)
+    validationSize  = int(maxData - trainingSize)
     trainData       = []
     trainLabel      = []
     validationData  = []
