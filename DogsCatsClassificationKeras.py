@@ -32,22 +32,22 @@ def SaveHistory(csvFilename, history):
 # Callback
 #------------------------------------------------------------------------------
 class ActivationHistory(keras.callbacks.Callback):
-        
+
     def __init__(self):
         self.layersIndex = []
         self.history     = {}
-                
+
     def set_training(self, training):
         self.trainingData = np.array(training)
-        
+
     def set_layers(self, layersIndex):
         self.layersIndex = layersIndex
         for index in self.layersIndex:
             self.history[self.get_layer_name(index)] = {'mean': [], 'std': []}
-    
+
     def get_layer_name(self, index):
         return 'layer' + str(index)
-    
+
     def format_history(self):
         formatted_history = {}
         for index in self.layersIndex:
@@ -65,7 +65,7 @@ class ActivationHistory(keras.callbacks.Callback):
             mean = np.mean(intermediate_output)
             std  = np.std(intermediate_output)
             self.history[self.get_layer_name(index)]['mean'].append(mean)
-            self.history[self.get_layer_name(index)]['std'].append(std) 
+            self.history[self.get_layer_name(index)]['std'].append(std)
             #print('Epoch {} layer {}: mean = {} std = {}'.format(epoch, self.get_layer_name(index), mean, std))
 #------------------------------------------------------------------------------
 
@@ -94,16 +94,16 @@ def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization
 
     model.add(Conv2D(64, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    # model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    # model.add(BatchNormalization())
+    model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    
+
     model.add(Conv2D(128, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    # model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    # model.add(BatchNormalization())
+    model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    
+
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
     model.add(BatchNormalization())
@@ -113,7 +113,7 @@ def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization
 
     optimizer = keras.optimizers.Adam(lr=learningRate)
     model.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics=['accuracy'])
-    
+
     return model
 #------------------------------------------------------------------------------
 
@@ -122,14 +122,14 @@ def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization
 # Fit the model
 #------------------------------------------------------------------------------
 def FitModel(
-        model, 
-        training, 
-        epochs, 
-        startingEpoch, 
-        batchSize, 
-        shuffle, 
-        layersIndex, 
-        verbose = 0, 
+        model,
+        training,
+        epochs,
+        startingEpoch,
+        batchSize,
+        shuffle,
+        layersIndex,
+        verbose = 0,
         validation = None):
 
     monitor = []
@@ -138,7 +138,7 @@ def FitModel(
         activationHistory.set_training(training['data'])
         activationHistory.set_layers(layersIndex)
         monitor.append(activationHistory)
- 
+
     history = model.fit(training['data'],
                         training['label'],
                         epochs = epochs,
@@ -152,7 +152,7 @@ def FitModel(
         activationHistory = monitor[0].format_history()
         for key in activationHistory:
             history.history[key] = activationHistory[key]
-                        
+
     return history
 #------------------------------------------------------------------------------
 
@@ -236,7 +236,7 @@ def main():
         validation = (data.item().get('data'), data.item().get('label'))
 
     # Create the model
-    model = CreateModel(dataSize, 
+    model = CreateModel(dataSize,
                         args.learningRate,
                         args.kernelInitializer)
 
