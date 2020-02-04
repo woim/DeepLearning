@@ -81,27 +81,27 @@ def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization
     model.add(Conv2D(16, kernel_size=3, activation='relu',
                      kernel_initializer=kernelInitializer, input_shape=dataSize))
     model.add(BatchNormalization())
-    # model.add(Conv2D(16, kernel_size=3, padding='same', activation='relu',
-    #                  kernel_initializer=kernelInitializer))
-    # model.add(BatchNormalization())
+    model.add(Conv2D(16, kernel_size=3, padding='same', activation='relu',
+                     kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Conv2D(32, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    # model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    # model.add(BatchNormalization())
+    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Conv2D(64, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    # model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    # model.add(BatchNormalization())
+    model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Conv2D(128, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    # model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    # model.add(BatchNormalization())
+    model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     
     model.add(Flatten())
