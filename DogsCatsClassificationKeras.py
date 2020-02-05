@@ -13,7 +13,7 @@ import pandas as pd
 import keras
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, \
-    BatchNormalization, Activation, Lambda
+    BatchNormalization, Activation, Lambda, Dropout
 from keras.models import Model
 
 
@@ -81,32 +81,37 @@ def CreateModel(dataSize, learningRate, kernelInitializer):#, batchNormalization
     model.add(Conv2D(16, kernel_size=3, activation='relu',
                      kernel_initializer=kernelInitializer, input_shape=dataSize))
     model.add(BatchNormalization())
-    model.add(Conv2D(16, kernel_size=3, padding='same', activation='relu',
-                     kernel_initializer=kernelInitializer))
-    model.add(BatchNormalization())
+    # model.add(Conv2D(16, kernel_size=3, padding='same', activation='relu',
+    #                  kernel_initializer=kernelInitializer))
+    # model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
 
     model.add(Conv2D(32, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    model.add(BatchNormalization())
+    # model.add(Conv2D(32, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    # model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
 
     model.add(Conv2D(64, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
-    model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
-    model.add(BatchNormalization())
+    # model.add(Conv2D(64, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    # model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
 
     model.add(Conv2D(128, kernel_size=3, activation='relu', kernel_initializer=kernelInitializer))
-    model.add(BatchNormalization())
-    model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
+    # model.add(BatchNormalization())
+    # model.add(Conv2D(128, kernel_size=3, padding='same', activation='relu', kernel_initializer=kernelInitializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
 
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
     model.add(BatchNormalization())
+    model.add(Dropout(0.25))
     # model.add(Dense(206, activation='relu'))
     # model.add(BatchNormalization())
     model.add(Dense(1,  activation='sigmoid'))
