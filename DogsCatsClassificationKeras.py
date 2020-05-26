@@ -13,7 +13,7 @@ import pandas as pd
 import keras
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, \
-    BatchNormalization, Activation, Lambda, Dropout, Add
+    BatchNormalization, Activation, Lambda, Dropout, Add, Input
 from keras.models import Model
 
 
@@ -221,7 +221,7 @@ def convolutional_block(X, f, filters, stage, block, kernelInitializer, s=2):
 def CreateResNet(dataSize, learningRate, kernelInitializer):
 
     # Define the input as a tensor with shape input_shape
-    X_input = Input(input_shape)
+    X_input = Input(dataSize)
 
     # Zero-Padding
     #X = ZeroPadding2D((3, 3))(X_input)
