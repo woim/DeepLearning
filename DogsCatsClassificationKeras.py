@@ -234,30 +234,30 @@ def CreateResNet(dataSize, learningRate, kernelInitializer):
     X = MaxPooling2D((3, 3), strides=(2, 2))(X)
 
     # Stage 2
-    X = convolutional_block(X, f=3, filters=[64, 64, 256], stage=2, block='a', s=1, kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [64, 64, 256], stage=2, block='b', kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [64, 64, 256], stage=2, block='c', kernel_initializer=kernelInitializer)
+    X = convolutional_block(X, f=3, filters=[64, 64, 256], stage=2, block='a', s=1, kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [64, 64, 256], stage=2, block='b', kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [64, 64, 256], stage=2, block='c', kernelInitializer=kernelInitializer)
 
     ### START CODE HERE ###
 
     # Stage 3 (≈4 lines)
-    X = convolutional_block(X, f = 3, filters = [128, 128, 512], stage = 3, block='a', s=2, kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [128, 128, 512], stage=3, block='b',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [128, 128, 512], stage=3, block='c',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [128, 128, 512], stage=3, block='d',kernel_initializer=kernelInitializer)
+    X = convolutional_block(X, f = 3, filters = [128, 128, 512], stage = 3, block='a', s=2, kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [128, 128, 512], stage=3, block='b',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [128, 128, 512], stage=3, block='c',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [128, 128, 512], stage=3, block='d',kernelInitializer=kernelInitializer)
 
     # Stage 4 (≈6 lines)
-    X = convolutional_block(X, f = 3, filters = [256, 256, 1024], stage = 4, block='a', s=2, kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='b',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='c',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='d',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='e',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='f',kernel_initializer=kernelInitializer)
+    X = convolutional_block(X, f = 3, filters = [256, 256, 1024], stage = 4, block='a', s=2, kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='b',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='c',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='d',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='e',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [256, 256, 1024], stage=4, block='f',kernelInitializer=kernelInitializer)
 
     # Stage 5 (≈3 lines)
-    X = convolutional_block(X, f = 3, filters = [512, 512, 2048], stage = 5, block='a', s=2,kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [512, 512, 2048], stage=5, block='b',kernel_initializer=kernelInitializer)
-    X = identity_block(X, 3, [512, 512, 2048], stage=5, block='c',kernel_initializer=kernelInitializer)
+    X = convolutional_block(X, f = 3, filters = [512, 512, 2048], stage = 5, block='a', s=2,kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [512, 512, 2048], stage=5, block='b',kernelInitializer=kernelInitializer)
+    X = identity_block(X, 3, [512, 512, 2048], stage=5, block='c',kernelInitializer=kernelInitializer)
 
     # AVGPOOL (≈1 line). Use "X = AveragePooling2D(...)(X)"
     X = AveragePooling2D((2,2), name="avg_pool")(X)
@@ -325,18 +325,24 @@ def main():
     parser = argparse.ArgumentParser(
         description = 'fit model',
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('trainingDataFile',
-                        type = str,
+    parser.add_argument('-d', '--dataSize',
+                        type = int,
+                        nargs = '*',
+                        default = [1,1,1],
+                        help = 'size of the data [n1, n2, n3].')
+    parser.add_argument('-t', '--trainingDataFile',
+                        type = argparse.FileType('r'),
+                        nargs = '?',
                         help = 'numpy file containing training data.')
     parser.add_argument('-v', '--validationDataFile',
-                        type = str,
+                        type  = argparse.FileType('r'),
                         nargs = '?',
                         help = 'numpy file containing validation data.')
     parser.add_argument('-m', '--modelFile',
                         type = str,
                         nargs = '?',
                         help = 'file to store the model.')
-    parser.add_argument('-t', '--trainingHistoryFile',
+    parser.add_argument('-hist', '--trainingHistoryFile',
                         type = str,
                         nargs = '?',
                         help = 'file to store the training history.')
@@ -384,11 +390,14 @@ def main():
     args = parser.parse_args()
 
     # Get training data shape
-    trainingData = np.load(args.trainingDataFile, allow_pickle=True)
-    training = {
-            'data':  trainingData.item().get('data') ,
-            'label': trainingData.item().get('label')}
-    dataSize = training['data'][0].shape
+    if args.trainingDataFile is not None:
+        trainingData = np.load(args.trainingDataFile, allow_pickle=True)
+        training = {
+                'data':  trainingData.item().get('data') ,
+                'label': trainingData.item().get('label')}
+    
+    dataSize = args.dataSize
+    print("DataSize: {}".format(dataSize))
 
     # Get validation data
     validation = None
@@ -397,16 +406,12 @@ def main():
         validation = (data.item().get('data'), data.item().get('label'))
 
     # Create the model
-    model = CreateModel(dataSize,
-                        args.learningRate,
-                        args.kernelInitializer)
+    model = CreateResNet(dataSize, args.learningRate, args.kernelInitializer)
+    model.summary()
 
     # Load Weigths
     if args.weightLoadFile is not None:
         model.load_weights(args.weightLoadFile)
-
-    # Print the model
-    model.summary()
 
     # Fit model
     shuffle = not args.sequential
