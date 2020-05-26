@@ -13,7 +13,7 @@ import pandas as pd
 import keras
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, \
-    BatchNormalization, Activation, Lambda, Dropout, Add, Input
+    BatchNormalization, Activation, Lambda, Dropout, Add, Input, ZeroPadding2D
 from keras.models import Model
 
 
@@ -224,7 +224,7 @@ def CreateResNet(dataSize, learningRate, kernelInitializer):
     X_input = Input(dataSize)
 
     # Zero-Padding
-    #X = ZeroPadding2D((3, 3))(X_input)
+    X = ZeroPadding2D((3, 3))(X_input)
 
     # Stage 1
     X = Conv2D(64, (7, 7), strides=(2, 2), name='conv1', kernel_initializer=kernelInitializer)(X)
