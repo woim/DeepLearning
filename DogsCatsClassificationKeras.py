@@ -14,7 +14,7 @@ import keras
 from keras.models import Sequential
 from keras import layers
 from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, \
-    BatchNormalization, Activation, Lambda, Dropout, Add, ZeroPadding2D
+    BatchNormalization, Activation, Lambda, Dropout, Add, ZeroPadding2D, AveragePooling2D
 from keras.models import Model
 
 
