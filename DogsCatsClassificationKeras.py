@@ -164,7 +164,7 @@ def identity_block(X, f, filters, stage, block, kernelInitializer):
 #------------------------------------------------------------------------------
 # ResNet convolutional block
 #------------------------------------------------------------------------------
-def convolutional_block(X, f, filters, stage, block, s = 2, kernelInitializer):
+def convolutional_block(X, f, filters, stage, block, kernelInitializer, s=2):
     """
     Arguments:
     X -- input tensor of shape (m, n_H_prev, n_W_prev, n_C_prev)
@@ -254,7 +254,7 @@ def CreateResNet(dataSize, learningRate, kernelInitializer):
     X = identity_block(X, 3, [256, 256, 1024], stage=4, block='f',kernel_initializer=kernelInitializer)
 
     # Stage 5 (≈3 lines)
-    X = convolutional_block(X, f = 3, filters = [512, 512, 2048], stage = 5, block='a', s = 2,kernel_initializer=kernelInitializer)
+    X = convolutional_block(X, f = 3, filters = [512, 512, 2048], stage = 5, block='a', s=2,kernel_initializer=kernelInitializer)
     X = identity_block(X, 3, [512, 512, 2048], stage=5, block='b',kernel_initializer=kernelInitializer)
     X = identity_block(X, 3, [512, 512, 2048], stage=5, block='c',kernel_initializer=kernelInitializer)
 
@@ -265,7 +265,7 @@ def CreateResNet(dataSize, learningRate, kernelInitializer):
 
     # output layer
     X = Flatten()(X)
-    X = Dense(classes, activation='softmax', name='fc' + str(classes), kernel_initializer = kernelInitializer)(X)
+    X = Dense(1, activation='sigmoid', kernel_initializer = kernelInitializer)(X)
         
     # Create model
     model = Model(inputs = X_input, outputs = X, name='ResNet50')
